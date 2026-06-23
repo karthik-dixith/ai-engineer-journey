@@ -4,4 +4,4 @@
 
 - Set up Git , python, and VS Code; cloned the repo.
 - Learned: What Git, GitHub, a repo , a commit and a push are.
-- Tripped me up: nothing yet
+- Tripped me up: " wrong terminal path, so cleared that"
