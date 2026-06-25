@@ -10,3 +10,8 @@
 
 - learned python's reference model : names -> objects, immutable vs mutable, aliasing trap
 - tripped me up: " do not use triple quotes for multi line comment"
+
+## Day 3
+
+- learned control flow if elif else for while range continue break, repr function, truthiness sweep
+- tripped me up - i thought any change made to a variable inside a loop is local and doesn't affect the variable outside which is wrong
