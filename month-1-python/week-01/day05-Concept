@@ -1,0 +1,227 @@
+Day 5 — Lists, Tuples, Dicts, Sets
+
+Today is the workhorse day for Python data structures. These four show up in every program you write from here on, and the choice between them is rarely arbitrary — each one encodes a different intent about your data. By the end of today you should be able to look at a problem and instantly know which container fits.
+
+We'll do them in order: lists → tuples → dicts → sets. Same loop as always — I explain, you predict, you type, you run, we discuss the mismatches.
+
+Concept 1: Lists — from first principles
+
+A list is an ordered, mutable sequence of objects. Let's unpack each word, because each one is doing real work.
+Ordered: the items have positions. The thing you put in first stays first (until you move it). Position matters — [1, 2, 3] is not the same list as [3, 2, 1]. This means you can index into them: my_list[0] gives you the first item.
+Mutable: you can change the list in place after creating it. Add items, remove items, replace items — the list object itself stays the same object (same identity, same id()), but its contents change. This is the crucial property that connects back to Day 2's reference model. Remember the aliasing trap? Lists are the classic example. If two names point to the same list and you mutate through one name, the other name sees the change — because there's only one list.
+
+Sequence of objects: a list doesn't store values, it stores references to objects. This is why a list can hold mixed types: [1, "hello", 3.14, True] is perfectly legal. Each slot just holds a pointer to whatever object lives there. (In practice you almost always want homogeneous lists — same type throughout — because that's what most algorithms and type hints expect. But Python doesn't enforce it.)
+
+Creating lists
+Two ways:
+
+empty = []                    # literal, empty
+nums = [1, 2, 3, 4, 5]        # literal, with items
+also_empty = list()           # constructor, empty
+from_string = list("hello")   # constructor from iterable → ['h', 'e', 'l', 'l', 'o']
+
+Indexing and slicing
+
+Indices start at 0. Negative indices count from the end: -1 is the last item, -2 is second-to-last.
+nums = [10, 20, 30, 40, 50]
+nums[0]    # 10
+nums[-1]   # 50
+nums[2]    # 30
+
+Slicing takes a range: nums[start:stop]. The start is inclusive, the stop is exclusive. This off-by-one rule is universal in Python — get it into muscle memory now.
+
+nums[1:4]    # [20, 30, 40]    — indices 1, 2, 3
+nums[:3]     # [10, 20, 30]    — from start to index 3 (excl.)
+nums[2:]     # [30, 40, 50]    — from index 2 to end
+nums[:]      # [10, 20, 30, 40, 50]  — full copy
+
+That last one — nums[:] — is important. It creates a new list with the same contents. This is one of the standard ways to copy a list and break the aliasing trap.
+Mutation — the methods that change the list in place
+
+Mutation — the methods that change the list in place
+These are the ones to know cold:
+
+Method        What it does
+
+lst.append(x)       adds x to the end
+lst.extend(iter)    adds all items from iter to the end
+lst.insert(i, x)    inserts x at index i, shifting later items right
+lst.pop()           removes and returns the last item
+lst.pop(i)          removes and returns the item at index i
+lst.remove(x)       removes the first occurrence of x (by value)
+lst.sort()          sorts the list in place
+lst.reverse()       reverses the list in place
+
+Critical detail: all of these return None (except pop, which returns the popped item). This is the same None-return pattern as print(). So result = my_list.sort() is a bug — result will be None, and your list got sorted as a side effect.
+If you want a sorted copy without mutating the original, use the built-in function sorted(my_list) instead — that returns a new list.
+Length, membership, concatenation
+pythonlen(nums)       # 5
+30 in nums      # True   — membership test
+[1, 2] + [3, 4] # [1, 2, 3, 4]   — concatenation creates a NEW list
+[0] * 4         # [0, 0, 0, 0]   — repetition
+
+Critical detail: all of these return None (except pop, which returns the popped item). This is the same None-return pattern as print(). So result = my_list.sort() is a bug — result will be None, and your list got sorted as a side effect.
+
+If you want a sorted copy without mutating the original, use the built-in function sorted(my_list) instead — that returns a new list.
+
+Length, membership, concatenation
+
+len(nums)       # 5
+30 in nums      # True   — membership test
+[1, 2] + [3, 4] # [1, 2, 3, 4]   — concatenation creates a NEW list
+[0] * 4         # [0, 0, 0, 0]   — repetition
+
+One small thing worth knowing — not a mistake, just a heads-up. nums[1:4] prints as [20, 30, 40] (with brackets), not 20, 30, 40. A slice of a list is itself a list, and print shows it with its list syntax. Tiny detail, but it tells you something real: slicing always gives you back the same type you sliced from. Slice a list → get a list. Slice a string → get a string. Slice a tuple → get a tuple. We'll lean on that consistency repeatedly.
+
+
+Concept 2: Tuples — the immutable cousin
+
+A tuple is an ordered, immutable sequence of objects. Everything you just learned about list indexing and slicing applies identically to tuples — t[0], t[-1], t[1:4], len(t), x in t. Same behavior, same syntax.
+The one difference: you cannot mutate a tuple after creating it. No append, no pop, no sort, no index assignment. Once it exists, it's frozen.
+
+t = (1, 2, 3)
+t[0] = 99      # TypeError: 'tuple' object does not support item assignment
+t.append(4)    # AttributeError: 'tuple' object has no attribute 'append'
+
+Why would you ever want immutability?
+This is the question everyone asks, and it's the right one. Three real reasons:
+
+1. It signals intent. When you write coordinates = (37.7749, -122.4194), you're telling the reader: "these two numbers belong together, and they're not going to change." A list of two numbers would be syntactically fine but semantically wrong — a list is a collection of similar things you might add to, a tuple is a fixed record of related things. Rule of thumb: lists are usually homogeneous and variable-length; tuples are usually heterogeneous and fixed-length. [1, 2, 3, 4, 5] (a list of measurements) vs ("Alice", 30, "Berlin") (a person record).
+
+2. Tuples are hashable (if their contents are). This is the one that will matter most for ML and data work. Only hashable objects can be used as dict keys or set members. Lists are unhashable because they're mutable — if you used a list as a dict key and then mutated it, the dict would lose track of where it stored the value. Tuples sidestep this. So if you ever need a compound key — say, indexing data by (year, month) or (user_id, session_id) — you reach for a tuple.
+
+3. Functions return tuples to bundle multiple values. When you write return x, y in a function, Python is actually building a tuple. The caller can then unpack it: a, b = my_func(). You'll see this constantly.
+
+Creating tuples
+
+empty = ()
+single = (42,)           # NOTE the trailing comma — required!
+pair = (1, 2)
+triple = 1, 2, 3         # parentheses are often OPTIONAL
+also_triple = tuple([1, 2, 3])
+
+The single-element tuple gotcha trips everyone exactly once. (42) is not a tuple — it's the integer 42 wrapped in pointless parentheses (parens are just grouping syntax in expressions). To make a one-element tuple, you need the trailing comma: (42,). The comma is what makes it a tuple, not the parentheses. In fact, this works:
+
+x = 42,        # x is now the tuple (42,)
+That's a true sentence. The comma alone is doing the work.
+
+Tuple unpacking
+
+This is the feature you'll use most often. You can assign the items of a tuple (or any sequence) to multiple names in one statement:
+
+point = (3, 4)
+x, y = point      # x = 3, y = 4
+
+# Works for any iterable, not just tuples:
+a, b, c = [1, 2, 3]
+first, second = "ab"
+
+# The classic swap — no temp variable needed:
+a, b = b, a
+
+That last line is iconic Python. The right-hand side b, a builds a tuple (b, a), and then the left-hand side unpacks it into a and b. Two statements happening atomically in one line.
+
+You can also use * to capture "the rest":
+
+first, *rest = [1, 2, 3, 4, 5]
+# first = 1, rest = [2, 3, 4, 5]   ← note: rest is a LIST
+
+*head, last = [1, 2, 3, 4, 5]
+# head = [1, 2, 3, 4], last = 5
+
+Concept 3: Dictionaries — the workhorse
+
+A dictionary (or dict) is an unordered* collection of key → value pairs. It is, without exaggeration, the most important data structure in Python. Every object in Python has a dict under the hood. Every JSON response, every config file, every Pandas row, every function's keyword arguments — dicts everywhere.
+(*Footnote on "unordered": since Python 3.7, dicts actually preserve insertion order. So iterating a dict gives you keys in the order you inserted them. But you should not rely on order for logic — if order matters, that's a signal you maybe wanted a list. Treat the ordering as a useful side benefit for debugging and display, not as a feature to design around.)
+The mental model
+A list maps integer positions → values: lst[0], lst[1], lst[2]. The "key" is implicit and always an integer.
+A dict generalizes this. It maps arbitrary keys → values: d["name"], d[42], d[("year", "month")]. You choose the keys. The lookup is still O(1) average — just as fast as a list index — because dicts are implemented as hash tables under the hood.
+That last fact is why dicts demand hashable keys. To store and retrieve by key in O(1), Python computes a hash of the key. If keys could change after insertion, the hash would change and the dict would lose the entry. So:
+
+Hashable (can be keys): int, float, str, bool, tuple (if it contains only hashable items), None, frozenset
+Not hashable (cannot be keys): list, dict, set
+
+This is where the tuple lesson from a moment ago pays off. If you ever want to key by a compound thing — (year, month), (user_id, session_id) — you use a tuple.
+
+Creating dicts
+
+empty = {}
+also_empty = dict()
+person = {"name": "Karthik", "age": 28, "city": "Berlin"}
+
+# From key-value pairs:
+pairs = dict([("a", 1), ("b", 2)])
+
+# From keyword args (only works for string keys):
+config = dict(host="localhost", port=8080)
+
+Note that {} is an empty dict, not an empty set. (Sets came later in Python's history; dicts got the curly-brace literal first.) An empty set has to be written set().
+Reading from a dict
+Two main ways, and the difference matters:
+
+
+person = {"name": "Karthik", "age": 28}
+
+person["name"]        # "Karthik"
+person["country"]     # KeyError: 'country'
+
+person.get("name")             # "Karthik"
+person.get("country")          # None       — no error, just None
+person.get("country", "DE")    # "DE"       — default value if missing
+
+The square-bracket form raises KeyError if the key is absent. The .get() method returns None (or a default you provide) if the key is absent. Which one to use depends on intent:
+
+Use d[key] when the key must exist — if it's missing, that's a bug and you want the program to fail loudly so you find out.
+Use d.get(key) or d.get(key, default) when the key might exist — you're explicitly handling the missing case.
+
+Writing to a dict
+
+person = {"name": "Karthik"}
+
+person["age"] = 28            # add a new key
+person["name"] = "Karthik P"  # overwrite an existing key
+
+There's no distinction between "insert" and "update" — assignment does both. If the key exists, you replace its value; if it doesn't, you create it.
+Deleting from a dict
+
+del person["age"]             # removes the key; KeyError if missing
+person.pop("age")             # removes AND returns the value; KeyError if missing
+person.pop("age", None)       # removes if present, returns None if missing — no error
+
+Membership and length
+
+"name" in person          # True   — checks KEYS, not values
+"Karthik" in person       # False  — even though it's a value
+len(person)               # number of key-value pairs
+
+The in operator on a dict checks keys, never values. If you want to check values, use "Karthik" in person.values() — but that's O(n), not O(1), so use it sparingly.
+
+Iterating
+
+This is where people most often stumble, because there are three things to iterate and they look very similar:
+
+person = {"name": "karthik", "age": 28, "city": "Berlin"}
+
+for key in person:             # iterates KEYS (default)
+    print(key)
+
+for key in person.keys():           # same thing, explicit
+    print(key)
+
+for value in person.values():         # iterates VALUES
+    print(value)
+
+for key, value in person.items():     # iterates (key, value) TUPLES — most useful
+    print(key, "->", value)
+
+The .items() form is the one you'll use most. Notice the tuple unpacking happening in the for line — each item from .items() is a tuple like ("name", "Karthik"), and for key, value in ... unpacks it on the fly. That's the same syntax you used in Exercise 4 of tuples; it just happens inside a for loop here.
+
+Updating from another dict
+
+defaults = {"host": "localhost", "port":8080,"debug": False}
+overrides = {"port": 9090, "debug": True}
+
+defaults.update(overrides)
+# defaults is now {"host": "localhost", "port": 9090, "debug": True}
+
+.update() mutates the original (and returns None — same pattern as .append() and .sort()). Keys present in both are overwritten by the new dict's values.
