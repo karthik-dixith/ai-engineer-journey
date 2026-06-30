@@ -37,7 +37,7 @@ print("-------------Exercise3-------------")
 person["age"] = 29
 person["country"] = "Germany"
 
-# predict the full dict now:"name":"Karthik", "age": 28, "city": "Berlin", "age":29, "country": "Germany"
+# predict the full dict now:"name":"Karthik", "age": 29, "city": "Berlin", "country": "Germany"
 print(person)
 
 # ---------------Exercise 4 : membership check keys, not values----------
@@ -110,5 +110,6 @@ for ch in text:
 
 # predict the final dict: {'m': 1, 'i': 4, 's': 4, 'p': 2}
 print(counts)
+
 
 

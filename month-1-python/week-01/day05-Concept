@@ -225,3 +225,47 @@ defaults.update(overrides)
 # defaults is now {"host": "localhost", "port": 9090, "debug": True}
 
 .update() mutates the original (and returns None — same pattern as .append() and .sort()). Keys present in both are overwritten by the new dict's values.
+
+
+Concept 4: Sets — uniqueness as a data structure
+
+A set is an unordered collection of unique, hashable items. Same hash-table machinery as a dict, but without the values — just the keys.
+Two questions a set answers in O(1):
+
+Is this item in here? (membership test, like in)
+What are the unique items in here? (no duplicates can exist)
+
+That's it. If your problem is "do I have this thing?" or "remove duplicates" or "what's in A but not B?" — that's a set.
+Why not just use a list?
+You could check membership with x in my_list, but it's O(n) — Python scans every item. For a set, x in my_set is O(1) — same hash-table lookup as a dict key. For 10 items that doesn't matter. For 10 million items it's the difference between an instant answer and your program hanging.
+
+Creating sets
+
+empty = set()                 # NOT {} - that's an empty dict
+small = {1, 2, 3}             # set literal - curly braces with values, no colons
+also = set([1, 2, 2, 3, 3])   # from any iterable; duplicates dropped ->{1, 2, 3} 
+from_string = set("hello")    # {'h', 'e', 'l', 'o'} - uniques only
+
+Mutation
+
+s = {1, 2, 3}
+s.add(4)          #{1, 2, 3, 4}
+s.add(2)          #{1, 2, 3, 4} - no error, no change; 2 was already there
+s.remove(3)       # {1, 2, 4} - raises KeyError if missing 
+s.discard(99)     # no-op if missing - silent
+s.pop()           # removes and returns an arbitrary element
+
+.add() and .remove() follow the now-familiar pattern — they return None, mutate in place.
+The set operations — this is where sets earn their keep
+
+a = {1, 2, 3, 4}
+b = {3, 4, 5, 6}
+
+a | b      # union: {1, 2, 3, 4, 5, 6}   — in A OR B
+a & b      # intersection: {3, 4}        — in A AND B
+a - b      # difference: {1, 2}          — in A but NOT in B
+a ^ b      # symmetric difference: {1, 2, 5, 6}  — in exactly one
+
+These read like algebra and behave like algebra. They also have method forms (a.union(b), a.intersection(b), etc.) which work the same way but accept any iterable on the right, not just a set.
+What can go in a set?
+Same rule as dict keys: hashable items only. So {1, 2, "three"} is fine, {(1, 2), (3, 4)} is fine (tuples of hashable items), but {[1, 2]} raises TypeError. Same reason as dicts — sets are hash tables, mutable items would break the hashing.

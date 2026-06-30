@@ -22,3 +22,9 @@
 - tripped me up - even if wrong position the value gets updated , global and local confusion, type hints prediction be more carefull
 
 Key lesson: Python decides local scope at compile time — assignment anywhere in a function makes the name local everywhere, including reads before the assignment (UnboundLocalError).
+
+## Day 5 (2026-06-29)
+
+- learned lists, tuples, dicts, sets. Indexing/slicing, mutation methods returning None, the sort/sorted split, tuple immutability and unpacking, dict reading patterns (bracket vs .get with defaults), the count-or-initialize idiom counts[ch] = counts.get(ch, 0) + 1, set membership and algebra, hashability rule for dict keys and set members.
+
+- trippes me up - dicts cannot hold duplicate keys (overwrite preserves postion); set dusplicates are eleiminated at construction; get()never raises for missing keys; confusion between .remove and .discard
