@@ -1,4 +1,4 @@
-# day 06_   Comprehensions
+# day 06  Comprehensions
 
 # ------ 1. Basic mapping --------
 squares = [n*n for n in range(6)]
