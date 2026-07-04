@@ -34,3 +34,9 @@ Key lesson: Python decides local scope at compile time — assignment anywhere i
 -learned : Comprehensions: list/dict/set comprehension; filter (trailing if) vs conditional transform (leading ternary); comprehension scope (variable does NOT leak, unlike for-loops); flatten vs list-of-lists.
 
 - Tripped me up: leaked loop var holds final value not the entire sequence; set comp collects the output expr (n%3 → {0,1,2}); dict-comp colliding keys are last-write-wins.
+
+## Day 7 (2026-07-04)
+
+- learned: Strings — immutable sequence, indexing/slicing (start:stop:step, negative step), case/whitespace/search methods, split & join.
+
+- tripped me up - parse by splitting on structural separators and indexing pieces — never count characters. Also: methods return new strings (opposite of .sort()); separator.join(list) not list.join(separator).
