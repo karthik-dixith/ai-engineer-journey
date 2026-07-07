@@ -40,3 +40,9 @@ Key lesson: Python decides local scope at compile time — assignment anywhere i
 - learned: Strings — immutable sequence, indexing/slicing (start:stop:step, negative step), case/whitespace/search methods, split & join.
 
 - tripped me up - parse by splitting on structural separators and indexing pieces — never count characters. Also: methods return new strings (opposite of .sort()); separator.join(list) not list.join(separator).
+
+## Day 8(2026-07-06)
+
+- learned : reviewed all the concepts learnt this week
+- tripped me up : .get(key) concept , strings are immutable lesson learnt , truthy and falsy concept
+- solved a problem which covers all the concepts split-parse, .get counting, sorted vs .sort(), or-fallback

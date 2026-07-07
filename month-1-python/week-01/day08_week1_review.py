@@ -97,6 +97,51 @@ logs = [
     "2024-01-17 | ERROR | disk full",
 ]
 
+# Write a program that does all four of these:
 
+print("------------Problem to solve--------------")
+
+# 1. Count how many times each level appears. Build a dict like {'ERROR': 3, 'INFO': 1, 'WARN': 1} using the .get(key, 0) + 1 idiom — loop the lines, split each on the pipe, pull out the level piece, strip it, count it.
+
+# 2. Collect just the messages into a list, in order, into a variable called messages. So ['disk full', 'started ok', 'timeout', 'low memory', 'disk full'].
+
+# 3. Sort that messages list two different ways and prove you understand the difference:
+
+# Make alpha = sorted(messages) and print both alpha and messages right after — show that messages is untouched.
+# Then call messages.sort() and print messages — show it's now mutated in place.
+# Predict what each of those three prints shows before running.
+
+# 4. Pick a display level using short-circuit or. Given a variable chosen = "" (empty, so falsy), write level = chosen or "ERROR" and print level. Predict what comes out and why.
+
+count = {}
+messages = []
+for line in logs:
+    parts = line.split("|")
+    level = parts[1].strip()
+    count[level] = count.get(level,0)+1
+    message = parts[2].strip()
+    messages.append(message)
+    
+    
+
+
+print(count)
+print(messages)
+alpha =sorted(messages) # predict : it returns the sorted output but doesn't affect the messages
+print(alpha)
+print(messages)   
+sort_mssg=messages.sort()  # predict:  it returns None as the sorting would be done to the messages 
+print(sort_mssg)
+chosen = ""
+level = chosen or "ERROR"
+# predict: it prints ERROR
+print(level)
+
+
+
+
+
+
+        
 
 
