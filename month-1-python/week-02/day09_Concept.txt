@@ -1,0 +1,61 @@
+Reading a whole file
+
+Here's the basic move, with real values so you see it before we generalize:
+
+with open('notes.txt') as f:
+    content = f.read()
+
+print(content)
+
+This prints:
+apple
+banana
+cherry
+
+open('notes.txt') hands you a file object — think of it as a handle to the file, not the text itself. .read() is what actually pulls the characters in. The value now stored in content is a single string: 'apple\nbanana\ncherry\n'. Every line break you see is a real \n character sitting inside that string, including a trailing \n after cherry, because your editor adds a newline at the end of the file when you save.
+The with ... as f: wrapper is the standard, correct way to open a file — it guarantees the file gets closed properly when the block ends. The machinery underneath it (context managers) is something we'll open up later this week; for now, just always open files this way.
+The cursor — the part that surprises people
+A file object keeps an internal position marker, a cursor, that starts at the very beginning. Reading advances it. Once .read() reaches the end of the file, the cursor is parked at the end, and there is nothing left to read.
+That leads straight into your first prediction. Type this out and write a # predict: line for each print before you run it:
+
+with open('notes.txt') as f:
+    first = f.read()
+    second = f.read()
+
+# predict:
+print(first)
+# predict:
+print(second)
+# predict:
+print(len(second))
+
+Now let's add the tool you'll actually reach for most often. Reading the whole file as one string is fine, but usually you want the lines separately — to loop over them, count them, process each one. Two ways:
+
+with open('notes.txt') as f:
+    lines = f.readlines()
+
+print(lines)
+
+.readlines() gives you a list, one element per line: ['apple\n', 'banana\n', 'cherry\n']. Notice each string still carries its trailing \n — the newline doesn't vanish just because the lines are split into a list. That detail bites people constantly, so hold onto it.
+The cleaner, more common pattern is to loop over the file object directly:
+
+The cleaner, more common pattern is to loop over the file object directly:
+
+with open('notes.txt') as f:
+    for line in f:
+        print(line)
+
+Iterating a file object hands you one line per pass, and it does this efficiently without loading the whole thing into memory at once — which matters when the file is huge. But run that and you'll notice the output looks double-spaced:
+
+apple
+
+banana
+
+cherry
+
+That's the same \n problem. Each line still ends in \n, and print() adds its own newline on top — so you get two. The fix is .strip(), which returns a new string with leading/trailing whitespace (including that \n) removed:
+
+with open('notes.txt') as f:
+        for line in f:
+            print(line.strip())
+
