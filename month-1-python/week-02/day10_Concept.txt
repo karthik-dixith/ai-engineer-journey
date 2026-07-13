@@ -1,0 +1,34 @@
+Writing basics: open(path, "w") and .write()
+
+Here's a complete worked example. Picture what lands on disk:
+
+with open("greeting.txt", "w") as f:
+    f.write("Hello")
+    f.write("World")
+
+Two things happen that are worth slowing down on.
+First, the "w" mode. When you open in write mode, Python creates greeting.txt if it doesn't exist — and if it does already exist, it empties it completely before you write a single character. Write mode doesn't pick up where the old file left off; it wipes the slate. Coming from other languages this trips people up, because "write" sounds additive. It isn't.
+
+Second, .write() is not print(). print("Hello") tacks on a newline for you. .write("Hello") writes exactly the characters you hand it, nothing more. So after the two writes above, greeting.txt contains:
+
+HelloWorld
+
+One line. No space, no newline between them. If you want line breaks or spaces, you put them in yourself with \n.
+That's the whole core idea. 
+
+part 1 problems explanation
+
+.write() returns the number of characters written, not the string. "first line" is ten characters, so you get 10. This is the same shape as a lot of Python calls that do something and report how much — useful when you want to confirm a write went through or tally bytes. Your "first line" guess was the natural one, but now you've seen: write reports a count, not an echo.
+
+Append: "a"
+
+"w" wipes and starts fresh. "a" (append) is its counterpart: it opens the file with the cursor at the end, and every write adds to what's already there. Nothing gets truncated. Worked example:
+
+with open("log.txt", "w") as f:
+    f.write("line one\n")
+
+with open("log.txt", "a") as f:
+    f.write("line two\n")
+
+with open("log.txt") as f:
+    print(f.read())

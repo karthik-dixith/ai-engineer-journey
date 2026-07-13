@@ -1,0 +1,5 @@
+Alice: 88
+Bob: 72
+Carol: 95
+Dan: 60
+Average: 78.75
