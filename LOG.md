@@ -41,8 +41,23 @@ Key lesson: Python decides local scope at compile time — assignment anywhere i
 
 - tripped me up - parse by splitting on structural separators and indexing pieces — never count characters. Also: methods return new strings (opposite of .sort()); separator.join(list) not list.join(separator).
 
-## Day 8(2026-07-06)
+## Day 8 (2026-07-06)
 
 - learned : reviewed all the concepts learnt this week
 - tripped me up : .get(key) concept , strings are immutable lesson learnt , truthy and falsy concept
 - solved a problem which covers all the concepts split-parse, .get counting, sorted vs .sort(), or-fallback
+
+## Day 9 (2026-07-10)
+
+- learned: File reading: with/open, .read() and the read cursor (second read returns ''), .readlines() vs iterating the file object, trailing \n on every line and stripping it. Coding problem: parse scores.txt, print each student, compute average.
+- tripped me up: predicted second f.read() would re-return full contents (got '' / len 0) — cursor stays at end, doesn't rewind; predicted len of full string as 17 (actual 20, each \n counts as one char).
+
+## Day 10 (2026-07-13)
+
+- learned: File writing: open modes "w" (truncate) and "a" (append), .write() writes exact chars + returns count, print vs write newline difference.
+- tripped me up: when in write mode .read() isn't a valid operation,wrote scores to report.txt in "w", appended derived average in "a". Caught a shadowed double-open (nested with reusing f) that worked on Windows by luck.
+
+## Day 11 (2026-07-14)
+
+- learned: Exceptions: try/except control flow (exception abandons rest of try), catch the narrowest type not bare except (bare swallows your own typos), 'as e' for the message, else runs only on success + finally runs always.
+- tripped me up : while solvind the problem of the day got stuck on adding new values to existing dictionary which caused a bug and created new dictionary everytime the loop ran so fixed it and learned

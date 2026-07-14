@@ -1,0 +1,76 @@
+Concept 1: The crash
+Here's a stripped-down version of your Day 9 scores parser. One row is malformed — Carol's score got mangled:
+
+scores = ["Alice 88", "Bob 72", "Carol xyz", "Dan 60"]
+
+for line in scores:
+    name, score = line.split()
+    print(f"{name}: {int(score)}")
+
+int("xyz") can't produce a number, so it raises ValueError: invalid literal for int() with base 10: 'xyz'. Here's the painful part: the program prints Alice, prints Bob, then dies on Carol — and Dan, who has a perfectly valid score, never gets processed at all. One bad row takes down the whole run. This is the fragility you carried out of Day 9 when I flagged that int('85\n') works but a malformed row wouldn't.
+
+Concept 2: Wrap the risky part in try / except
+
+scores = ["Alice 88", "Bob 72", "Carol xyz", "Dan 60"]
+
+for line in scores:
+    name, score = line.split()
+    try:
+        print(f"{name}: {int(score)}")
+    except ValueError:
+        print(f"{name}: (invalid score)")
+
+
+Now Carol's bad row is caught, printed as (invalid score), and the loop keeps going to Dan. The program survives.
+
+The mechanic to lock in: Python tries the code in the try block. The instant a line raises the error named in except, it abandons the rest of the try block and jumps straight to except. If nothing goes wrong, the except block is skipped entirely. That "abandons the rest" part is the piece that trips people up — so let's make you predict it directly.
+
+Concept 3: except: catches everything — including your own typos
+A bare except: doesn't just catch the error you're worried about. It catches every exception — including NameError, TypeError, a KeyboardInterrupt when you hit Ctrl-C, and, most painfully, programming mistakes you'd want to see. Here's the failure mode:
+
+scores = {"Alice": "88", "Bob": "72"}
+
+def get_score(name):
+    try:
+        return int(scores[nam])   # typo: 'nam' should be 'name'
+    except:
+        return "not found"
+
+The nam typo raises a NameError — a genuine bug in your code. But the bare except: swallows it and returns "not found", so the program runs happily and lies to you. You'd stare at this wondering why Alice is "not found" when she's right there in the dict. The bug is invisible.
+
+Prediction Exercise 2 do it in the python file
+
+Concept 4: Catching several specific errors, and the exception object
+Your scores parser actually has two things that can break per row, not one:
+
+rows = ["Alice 88", "Bob", "Carol xyz", "Dan 60"]
+
+for line in rows:
+    try:
+        name, score = line.split()       # "Bob" -> only ONE piece -> unpacking fails
+        print(f"{name}: {int(score)}")   # "xyz" -> int() fails
+    except ValueError as e:
+        print(f"skipping bad row: {e}")
+
+"Bob" has nothing to split, so name, score = ... can't unpack one value into two → ValueError. "Carol xyz" splits fine but int("xyz") → also ValueError. Both happen to be ValueError, so one except catches both.
+The new piece is as e. That binds the actual exception object to a variable e, so you can inspect or print it — the message, the type, whatever. print(e) gives you the human-readable reason.
+
+Concept 5: else and finally
+try/except has two optional trailing blocks, and they answer two different questions:
+
+def read_config(path):
+    try:
+        f = open(path)
+    except FileNotFoundError:
+        print("no config, using defaults")
+    else:
+        print("config opened")   # runs ONLY if try succeeded (no exception)
+        f.close()
+    finally:
+        print("done trying")     # runs ALWAYS — success or failure
+
+else runs only when the try block completed with no exception. Why not just put that code at the end of try? Because you want the "it worked" code outside the protected zone — you don't want a bug in your success-path code accidentally caught by the except above it. else keeps the try block as small as the risky operation itself.
+
+finally runs no matter what — exception or not, caught or not, even if you return out of the try. It's for cleanup that must happen regardless: closing a file, releasing a lock. (This is exactly what with open(...) does for you automatically — with is finally: f.close() under the hood.)
+
+Prediction Exercise 4 do it in the python file

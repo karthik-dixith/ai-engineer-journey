@@ -1,7 +1,7 @@
 #  Day05 Tuples exercises
 
 # -----------Exercise 1: tuples behave like lists for reading----------
-print("-------------Exercise1--------------")
+
 
 point = (3,4,5)
 
