@@ -1,0 +1,58 @@
+Day 12 — Context managers: what with actually does
+Yesterday you learned to catch exceptions. Today you learn the tool that handles the cleanup half of the same problem — and you'll find out that with, which you've been typing since Day 9, is try/finally in disguise.
+
+Concept 1: The problem with solves
+Start with the version you'd write if with didn't exist:
+f = open("data.txt", "w")
+f.write("hello")
+f.close()
+
+That looks fine. Now put a bug in the middle:
+
+f = open("data.txt", "w")
+f.write(1 / 0)      # ZeroDivisionError
+f.close()           # never runs
+
+The exception fires on line 2, and line 3 — the close() — is abandoned, exactly like the rest of a try block is abandoned when an exception hits. The file object stays open with your data sitting in an unflushed buffer. Not a crash you'd notice; a crash you'd notice later, when the file turns out to be empty.
+
+Yesterday's tool fixes it:
+
+f = open("data.txt", "w")
+try:
+    f.write("hello")
+finally:
+    f.close()       # runs no matter what
+
+finally always runs — normal exit, return, or exception on the way out. That's the guarantee.
+
+And that four-line block is precisely what this does:
+
+with open("data.txt", "w") as f:
+    f.write("hello")
+
+with is not a special file feature. It's a generic protocol: set something up, guarantee the teardown, no matter how the block exits.
+
+Concept 2: Writing your own
+
+Concrete first. A timer that reports how long a block took:
+
+import time
+
+class Timer:
+    def __enter__(self):
+        self.start = time.time()
+        return self              # this is what `as t` will get
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.elapsed = time.time() - self.start
+        print(f"took {self.elapsed:.3f}s")
+
+with Timer() as t:
+    total = sum(range(5_000_000))
+
+print("elapsed was", t.elapsed)
+
+
+Concept 3: The trap — __exit__ returning True
+
+You returned False from __exit__ and the KeyError sailed on through to the handler. That's the normal case. Now watch what True does:

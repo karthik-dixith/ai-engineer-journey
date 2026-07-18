@@ -61,3 +61,9 @@ Key lesson: Python decides local scope at compile time — assignment anywhere i
 
 - learned: Exceptions: try/except control flow (exception abandons rest of try), catch the narrowest type not bare except (bare swallows your own typos), 'as e' for the message, else runs only on success + finally runs always.
 - tripped me up : while solvind the problem of the day got stuck on adding new values to existing dictionary which caused a bug and created new dictionary everytime the loop ran so fixed it and learned
+
+## Day 12 (2026-07-18)
+
+- learned: Context managers: a context is a temporary state of the world, a manager sets it up and guarantees the teardown. `with` is try/finally in disguise — cleanup runs on the crash path too. Protocol is two methods: __enter__ at block start, __exit__ at block end. `as` binds __enter__'s RETURN VALUE (files return self, which hides this). Order: enter → body → exit.
+
+- Tripped me up : the flow of the context manager which is __enter__ then body then the __exit__  
