@@ -64,6 +64,13 @@ Key lesson: Python decides local scope at compile time — assignment anywhere i
 
 ## Day 12 (2026-07-18)
 
-- learned: Context managers: a context is a temporary state of the world, a manager sets it up and guarantees the teardown. `with` is try/finally in disguise — cleanup runs on the crash path too. Protocol is two methods: __enter__ at block start, __exit__ at block end. `as` binds __enter__'s RETURN VALUE (files return self, which hides this). Order: enter → body → exit.
+- learned: Context managers: a context is a temporary state of the world, a manager sets it up and guarantees the teardown. `with` is try/finally in disguise — cleanup runs on the crash path too. Protocol is two methods: **enter** at block start, **exit** at block end. `as` binds **enter**'s RETURN VALUE (files return self, which hides this). Order: enter → body → exit.
 
-- Tripped me up : the flow of the context manager which is __enter__ then body then the __exit__  
+- Tripped me up : the flow of the context manager which is **enter** then body then the **exit**
+
+## Day 13 (2026-07-22)
+
+- learned: **exit** return value controls exception suppression (truthy swallows, falsy propagates); cleanup always runs regardless.
+  @contextmanager decorator: yield splits function into enter (above) and exit (below); cleanup must go in finally, not after the try block.
+
+- Tripped me up: initially the exceution flow of the with class and the two dunder methods then clarified first object instantiation-> **enter**-> the body or the block below with -> **exit**

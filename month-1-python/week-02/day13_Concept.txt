@@ -1,0 +1,145 @@
+On Day 12 you wrote __exit__(self, exc_type, exc_value, traceback) but we never used those three parameters, and we never talked about what __exit__ returning something actually does. Both of those turn out to matter, and they're connected.
+
+Here's the concrete fact: when the with block exits, Python calls __exit__ and passes it information about how the block exited. If the block finished cleanly, all three parameters are None. If an exception was raised inside the block, those three get filled in with the exception's class, the exception object itself, and its traceback.
+
+Worked example
+
+class Watcher:
+    def __enter__(self):
+        return self
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("exc_type:", exc_type)
+        print("exc_value:", exc_value)
+        return False
+
+with Watcher():
+    print("all good")
+
+Output:
+
+all good
+exc_type: None
+exc_value: None
+
+No exception happened, so the three parameters came through as None. Nothing dramatic yet. The interesting behavior shows up when an exception does happen inside the block — and that's where the return value earns its keep.
+
+The rule: if __exit__ returns a truthy value, Python treats the exception as handled and swallows it — the program continues after the with block as if nothing went wrong. If __exit__ returns a falsy value (False, None, or just no return at all), the exception propagates normally and crashes out the way you'd expect.
+
+he flow is not "run the block, then enter." It's the reverse of that. __enter__ fires before the block runs, not after. Let me trace it precisely.
+
+When Python hits with Watcher():, three distinct things happen in order, and only the third is the block.
+
+Step 1 — build the object. Watcher() runs first. This is just normal instantiation — it calls __init__ and produces a Watcher instance. Nothing context-manager-specific yet; this is the same thing that happens any time you write Watcher() anywhere.
+
+Step 2 — call __enter__. Now Python calls __enter__ on that object. Whatever __enter__ returns is bound to the as variable (if you wrote one). This happens before a single line of the indented block executes. This is the setup phase — opening the file, starting the timer, acquiring the lock.
+
+Step 3 — run the block. Only now do the indented lines under the with run.
+
+Step 4 — call __exit__. When the block finishes — whether it finished cleanly or got blown apart by a raise — Python calls __exit__. This is the teardown phase.
+
+So the correct mental order is: construct → enter → block → exit. Enter is the bookend before, exit is the bookend after. The block sits in the middle, wrapped on both sides.
+
+Here's a version that makes every step print, so the order is impossible to miss. 
+
+class Watcher:
+    def __init__(self):
+        print("1: constructing")
+    def __enter__(self):
+        print("2: entering")
+        return self
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("4: exiting")
+        return False
+
+with Watcher():
+    print("3: inside the block")
+
+You'll get them in exactly this order:
+
+1: constructing
+2: entering
+3: inside the block
+4: exiting
+
+# ----------------Second half ---------------------
+
+contextlib.contextmanager. The class version you've been writing works, but it's heavy — a whole class, two dunder methods, just to run some setup and teardown. The decorator lets you write the same thing as a single function with a yield in the middle. Let me show you the exact same Watcher behavior both ways so you can see the translation.
+
+The class you already know
+
+class Watcher:
+    def __enter__(self):
+        print("entering")
+        return self
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("exiting")
+        return False
+
+The same thing as a function
+python
+
+from contextlib import contextmanager
+
+@contextmanager
+def watcher():
+    print("entering")
+    yield
+    print("exiting")
+
+with watcher():
+    print("inside the block")
+
+You get:
+
+entering
+inside the block
+exiting
+
+Same sandwich — setup, block, teardown — but no class, no dunders.
+
+How to read it
+
+The yield is the hinge. Everything above yield is the __enter__ body — it runs when you enter the with. Then yield hands control to the block. Everything below yield is the __exit__ body — it runs when the block finishes.
+
+def watcher():
+    print("entering")   # <- this is __enter__
+    yield               # <- block runs here
+    print("exiting")    # <- this is __exit__
+
+So the flow maps exactly onto what you just traced: the function runs top-to-bottom, but pauses at yield to let your with block run, then resumes from yield to do cleanup. One function, split into before-and-after by a single yield.
+
+Giving the block a value (the as part)
+
+If you want with watcher() as w: to bind something, you yield that value:
+
+from contextlib import contextmanager
+
+@contextmanager
+def timer():
+    import time
+    start = time.time()
+    yield start
+    elapsed = time.time() - start
+    print(f"elapsed: {elapsed:.4f}s")
+
+with timer() as t:
+    print("start time was", t)
+    total = sum(range(1_000_000))
+
+Whatever you put after yield is what lands in the as variable. Here yield start means t gets the start time. In the class version, that value was whatever __enter__ returned — here, it's whatever you yield.
+
+The fix is a try/finally around the yield:
+
+from contextlib import contextmanager
+
+@contextmanager
+def watcher():
+    print("entering")
+    try:
+        yield
+    finally:
+        print("exiting")     # runs even if the block raised
+
+with watcher():
+    print("start")
+    raise ValueError("boom")
